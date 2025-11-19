@@ -1,28 +1,745 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Info Tech Quiz Master</title>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Info Tech Master - 高校情報I</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
-      body {
-        font-family: 'Inter', sans-serif;
-      }
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3); 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5); 
+        }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0"
-  }
-}
-</script>
 </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
+
+    <!-- Background Effects -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-3xl"></div>
+        <div class="absolute top-[40%] -right-[10%] w-[40%] h-[40%] rounded-full bg-purple-500/10 blur-3xl"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div id="app" class="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
+        <!-- Loading Message -->
+        <div class="text-center animate-pulse p-8 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
+            <div class="mb-4 text-indigo-300">
+                <svg class="animate-spin h-8 w-8 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+            <p class="text-indigo-200 font-mono">Loading Application...</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="fixed bottom-4 right-4 text-[10px] text-slate-500/50 pointer-events-none font-mono z-10">
+        Info Tech Master v4.5
+    </div>
+
+    <!-- ========================================= -->
+    <!-- APPLICATION SCRIPT (DATA + LOGIC)         -->
+    <!-- ========================================= -->
+    <script>
+        // 1. QUESTION DATA
+        const QUESTION_BANK = {
+            "01 情報とメディアの特性": [
+                {
+                    question: "観測や調査などで得られる客観的事実のことを何というか。",
+                    options: ["データ", "情報", "知識", "知恵"],
+                    correctAnswerIndex: 0,
+                    explanation: "データは事実そのものであり、それを分析して意味を持たせたものが「情報」、さらに体系化したものが「知識」となります。"
+                },
+                {
+                    question: "情報社会（Society 4.0）に続く、サイバー空間とフィジカル空間を融合させた新しい社会を何と呼ぶか。",
+                    options: ["Society 5.0", "Industry 4.0", "Web 3.0", "Metaverse"],
+                    correctAnswerIndex: 0,
+                    explanation: "Society 5.0は、狩猟、農耕、工業、情報社会に続く、日本が提唱する未来社会の姿です。"
+                },
+                {
+                    question: "情報の特性として、一度生成されると完全には消えない性質を何というか。",
+                    options: ["残存性", "複製性", "伝播性", "個別性"],
+                    correctAnswerIndex: 0,
+                    explanation: "デジタルデータなどはコピーしても劣化せず（複製性）、容易に広まり（伝播性）、一度出回ると完全に消すことが難しい（残存性）という特性があります。"
+                },
+                {
+                    question: "情報をとりいれるもととなるものを何というか。",
+                    options: ["情報源", "データベース", "メディア", "サーバー"],
+                    correctAnswerIndex: 0,
+                    explanation: "情報をとりいれる「情報源」よりデータを得て、情報として分析します。"
+                },
+                {
+                    question: "得られた情報を、ほかの情報とつきあわせて確認することを何というか。",
+                    options: ["クロスチェック", "ダブルチェック", "バックアップ", "フィードバック"],
+                    correctAnswerIndex: 0,
+                    explanation: "相互確認（クロスチェック）を行うことで、誤った情報や偽の情報を取り除く「情報の検証」を行います。"
+                }
+            ],
+            "02 問題解決": [
+                {
+                    question: "問題解決において、「あるべき姿（理想）」と「現実」のギャップのことを何と定義するか。",
+                    options: ["問題", "課題", "リスク", "インシデント"],
+                    correctAnswerIndex: 0,
+                    explanation: "問題解決の手法では、理想と現実の差を「問題」と捉え、それを埋める行為を解決と呼びます。"
+                },
+                {
+                    question: "ブレーンストーミングの4つのルールに含まれないものはどれか。",
+                    options: ["質より量を重視する", "批判をしない", "他人の意見に便乗する", "結論を急ぐ"],
+                    correctAnswerIndex: 3,
+                    explanation: "ブレーンストーミングでは、自由な発想を促すため、批判禁止・質より量・自由奔放・便乗（結合・改善）がルールとされます。"
+                },
+                {
+                    question: "業務改善の手法である「PDCAサイクル」の「A」は何を表しているか。",
+                    options: ["Act（改善）", "Action（行動）", "Analyze（分析）", "Approve（承認）"],
+                    correctAnswerIndex: 0,
+                    explanation: "Plan（計画）→Do（実行）→Check（評価）→Act（改善）のサイクルを指します。"
+                },
+                {
+                    question: "作業計画を視覚的に表現するために用いられる工程表を何というか。",
+                    options: ["ガントチャート", "フローチャート", "レーダーチャート", "パレート図"],
+                    correctAnswerIndex: 0,
+                    explanation: "ガントチャートは、横軸に時間をとり、作業の開始・終了や進捗状況を棒グラフで表したものです。"
+                },
+                {
+                    question: "一方の要素を改善すると、他方の要素が悪化するような状態を何というか。",
+                    options: ["トレードオフ", "ジレンマ", "パラドックス", "ボトルネック"],
+                    correctAnswerIndex: 0,
+                    explanation: "トレードオフの関係にある場合、両立させるための工夫や妥協点の探索が必要になります。"
+                }
+            ],
+            "03 情報モラル": [
+                {
+                    question: "コンピュータの画面を長時間見続けることで起きる、目の疲れや身体の不調を何というか。",
+                    options: ["VDT障害", "テクノ不安症", "テクノ依存症", "ドライアイ症候群"],
+                    correctAnswerIndex: 0,
+                    explanation: "Visual Display Terminals（VDT）障害は、ディスプレイ作業による心身の不調の総称です。"
+                },
+                {
+                    question: "情報技術を使える人と使えない人の間に生じる、社会的・経済的な格差のことを何というか。",
+                    options: ["デジタルデバイド", "情報格差", "アクセシビリティ", "フィルタリング"],
+                    correctAnswerIndex: 0,
+                    explanation: "デジタルデバイド（情報格差）は、IT利用能力の差が機会や利益の差につながる問題を指します。"
+                },
+                {
+                    question: "特定の条件に基づいて、有害なサイトへのアクセスを制限する機能を何というか。",
+                    options: ["フィルタリング", "ファイアウォール", "モニタリング", "ブロッキング"],
+                    correctAnswerIndex: 0,
+                    explanation: "フィルタリングは、青少年などを有害情報から守るためにWebサイトの閲覧制限を行う機能です。"
+                },
+                {
+                    question: "過度に情報機器に依存してしまう精神的な症状を何というか。",
+                    options: ["テクノ依存症", "テクノ不安症", "ネット中毒", "スマホ首"],
+                    correctAnswerIndex: 0,
+                    explanation: "テクノ依存症は、情報機器がないと不安になったり、日常生活に支障をきたしたりする状態です。"
+                },
+                {
+                    question: "情報社会で適正な活動を行うための「考え方と態度」を指す言葉はどれか。",
+                    options: ["情報モラル", "情報マナー", "情報リテラシー", "情報倫理"],
+                    correctAnswerIndex: 0,
+                    explanation: "「モラル」は目に見えない考え方や態度を指し、「マナー」は目に見える行動や作法を指します。"
+                }
+            ],
+            "04 個人情報": [
+                {
+                    question: "個人情報における「基本四情報」に含まれないものはどれか。",
+                    options: ["電話番号", "氏名", "住所", "性別"],
+                    correctAnswerIndex: 0,
+                    explanation: "基本四情報は「氏名、住所、生年月日、性別」を指します。電話番号は含まれません。"
+                },
+                {
+                    question: "個人の私生活上の自由、またその権利のことを何というか。",
+                    options: ["プライバシー権", "肖像権", "パブリシティ権", "知る権利"],
+                    correctAnswerIndex: 0,
+                    explanation: "プライバシー権は、私的な情報を他人から干渉されたり侵害されたりしない権利です。"
+                },
+                {
+                    question: "写真データなどに含まれる、撮影地点の緯度経度などの位置情報を何というか。",
+                    options: ["ジオタグ", "Exif情報", "メタデータ", "タイムスタンプ"],
+                    correctAnswerIndex: 0,
+                    explanation: "ジオタグ（Geotag）は、GPS機能付きカメラなどで撮影した際に付加される位置情報です。プライバシー流出の原因になることがあります。"
+                },
+                {
+                    question: "利用者が「サービスの中止」を伝えるまではサービスの提供を続ける方式を何というか。",
+                    options: ["オプトアウト", "オプトイン", "クーリングオフ", "デフォルト"],
+                    correctAnswerIndex: 0,
+                    explanation: "逆に、利用者が「利用する意思」を伝えるまで提供しない方式をオプトインといいます。"
+                },
+                {
+                    question: "本物そっくりの偽サイトに誘導し、IDやパスワードなどを不正に入手する詐欺手法はどれか。",
+                    options: ["フィッシング詐欺", "ワンクリック詐欺", "スパイウェア", "キーロガー"],
+                    correctAnswerIndex: 0,
+                    explanation: "金融機関などを装ったメールから偽サイトへ誘導し情報を釣る（Fishing）行為です。"
+                }
+            ],
+            "05 知的財産権": [
+                {
+                    question: "産業財産権のうち、技術的なアイデアのうち「高度なもの」を保護する権利はどれか。",
+                    options: ["特許権", "実用新案権", "意匠権", "商標権"],
+                    correctAnswerIndex: 0,
+                    explanation: "特許権は高度な発明を保護し、出願から20年間有効です。小発明は実用新案権となります。"
+                },
+                {
+                    question: "著作権の保護期間は、原則として著作者の死後何年か。",
+                    options: ["70年", "50年", "20年", "100年"],
+                    correctAnswerIndex: 0,
+                    explanation: "著作権法改正により、保護期間は著作者の死後70年まで延長されました。"
+                },
+                {
+                    question: "著作権のうち、著作者の人格的な利益を保護する、譲渡できない権利を何というか。",
+                    options: ["著作者人格権", "著作隣接権", "財産権", "複製権"],
+                    correctAnswerIndex: 0,
+                    explanation: "著作者人格権には、公表権、氏名表示権、同一性保持権が含まれ、これらは譲渡も相続もできません。"
+                },
+                {
+                    question: "一定の条件を満たせば、著作権者の許諾を得ずに他人の著作物を利用できる行為を何というか。",
+                    options: ["引用", "転載", "複製", "翻案"],
+                    correctAnswerIndex: 0,
+                    explanation: "引用は、公正な慣行に合致し、正当な範囲内であれば許諾なしに行えます（出典の明示が必要です）。"
+                },
+                {
+                    question: "著作物の利用条件を意思表示するための国際的なマークの枠組みを何というか。",
+                    options: ["クリエイティブ・コモンズ", "コピーライト", "トレードマーク", "パブリックドメイン"],
+                    correctAnswerIndex: 0,
+                    explanation: "CCライセンス（表示、非営利、改変禁止、継承の組み合わせ）を利用して、著作者が利用条件を提示できます。"
+                }
+            ],
+            "06 情報セキュリティ": [
+                {
+                    question: "情報セキュリティの三要素（CIA）に含まれないものはどれか。",
+                    options: ["責任性", "機密性", "完全性", "可用性"],
+                    correctAnswerIndex: 0,
+                    explanation: "CIAは機密性(Confidentiality)、完全性(Integrity)、可用性(Availability)の頭文字です。"
+                },
+                {
+                    question: "許可された人だけが情報にアクセスできる状態を維持することを何というか。",
+                    options: ["機密性", "完全性", "可用性", "真正性"],
+                    correctAnswerIndex: 0,
+                    explanation: "IDやパスワード認証などで、関係ない人が情報を見られないようにするのは機密性の確保です。"
+                },
+                {
+                    question: "コンピュータの技術を使わず、人の心理的な隙や行動のミスにつけ込んで情報を盗む手法を何というか。",
+                    options: ["ソーシャルエンジニアリング", "ハッキング", "クラッキング", "スプーフィング"],
+                    correctAnswerIndex: 0,
+                    explanation: "電話でパスワードを聞き出す、ゴミ箱をあさる、肩越しに覗き見る（ショルダーハッキング）などが該当します。"
+                },
+                {
+                    question: "ファイルを勝手に暗号化し、元に戻すための「身代金」を要求するマルウェアを何というか。",
+                    options: ["ランサムウェア", "スパイウェア", "ワーム", "トロイの木馬"],
+                    correctAnswerIndex: 0,
+                    explanation: "Ransom（身代金）とSoftwareを組み合わせた言葉です。"
+                },
+                {
+                    question: "ネットワークの出入り口に設置し、不正なアクセスを遮断する仕組みを何というか。",
+                    options: ["ファイアウォール", "プロキシサーバ", "ルータ", "スイッチ"],
+                    correctAnswerIndex: 0,
+                    explanation: "防火壁（Firewall）のように、外部からの攻撃や内部からの不正な送信を防ぎます。"
+                }
+            ],
+            "07 情報技術の発展": [
+                {
+                    question: "店舗などで商品が販売された時点での情報を管理するシステムを何というか。",
+                    options: ["POSシステム", "EOSシステム", "GPSシステム", "GISシステム"],
+                    correctAnswerIndex: 0,
+                    explanation: "Point Of Sales（販売時点情報管理）システムは、レジでの売上データをリアルタイムに管理します。"
+                },
+                {
+                    question: "あらゆる「モノ」がインターネットにつながり、通信を行う仕組みを何というか。",
+                    options: ["IoT", "ICT", "AI", "VR"],
+                    correctAnswerIndex: 0,
+                    explanation: "Internet of Things（モノのインターネット）のことです。"
+                },
+                {
+                    question: "現実空間にデジタルの情報を重ね合わせて表示する技術を何というか。",
+                    options: ["AR（拡張現実）", "VR（仮想現実）", "MR（複合現実）", "SR（代替現実）"],
+                    correctAnswerIndex: 0,
+                    explanation: "Augmented Reality（AR）は、スマホのカメラ映像などにCGキャラや案内情報を重ねる技術です。"
+                },
+                {
+                    question: "ETC（自動料金支払いシステム）などで利用されている、高度道路交通システムの略称はどれか。",
+                    options: ["ITS", "GPS", "ICT", "IOT"],
+                    correctAnswerIndex: 0,
+                    explanation: "Intelligent Transport Systems（高度道路交通システム）の一環としてETCがあります。"
+                },
+                {
+                    question: "人間が行う知的活動の一部をコンピュータに代替させる技術を何というか。",
+                    options: ["AI", "RPA", "IoT", "Bot"],
+                    correctAnswerIndex: 0,
+                    explanation: "Artificial Intelligence（人工知能）のことです。"
+                }
+            ],
+            "08 メディアとコミュニケーション": [
+                {
+                    question: "コミュニケーションにおいて、会話や電話のようにタイミングが同じである形態を何というか。",
+                    options: ["同期型", "非同期型", "蓄積型", "分散型"],
+                    correctAnswerIndex: 0,
+                    explanation: "リアルタイムにやり取りするものを同期型、メールやSNSのように時間差があるものを非同期型と呼びます。"
+                },
+                {
+                    question: "情報を鵜呑みにせず、批判的に読み解き活用する能力を何というか。",
+                    options: ["メディアリテラシー", "情報モラル", "デジタルスキル", "コミュニケーション能力"],
+                    correctAnswerIndex: 0,
+                    explanation: "情報の真偽（信憑性）を見極め、発信者の意図を理解する力がメディアリテラシーです。"
+                },
+                {
+                    question: "不特定多数の人々に大量の情報を伝達するメディアを何というか。",
+                    options: ["マスメディア", "パーソナルメディア", "ソーシャルメディア", "ネットワークメディア"],
+                    correctAnswerIndex: 0,
+                    explanation: "テレビ、ラジオ、新聞、雑誌の4大メディアなどが代表的です。"
+                },
+                {
+                    question: "15世紀にグーテンベルクが発明し、情報の伝達に革命をもたらした技術は何か。",
+                    options: ["活版印刷", "写本", "木版印刷", "インターネット"],
+                    correctAnswerIndex: 0,
+                    explanation: "活版印刷技術により、書籍の大量生産が可能になり、知識が広く普及しました。"
+                },
+                {
+                    question: "SNSなどで見られる「自分の興味に近い情報ばかりが表示され、偏った考えに陥る」現象に関連する用語はどれか。",
+                    options: ["フィルターバブル", "パンデミック", "デジタルデバイド", "クラウド"],
+                    correctAnswerIndex: 0,
+                    explanation: "自分の好みに合わせた情報（フィルター）の中に孤立（バブル）してしまう現象です。"
+                }
+            ],
+            "09 情報デザイン": [
+                {
+                    question: "情報を視覚的にわかりやすく表現することを何というか。",
+                    options: ["可視化", "抽象化", "構造化", "記号化"],
+                    correctAnswerIndex: 0,
+                    explanation: "グラフや図解などを用いて、直感的に理解できるようにすることを情報の可視化といいます。"
+                },
+                {
+                    question: "非常口のマークのように、言語に頼らず直感的に意味を伝える図記号を何というか。",
+                    options: ["ピクトグラム", "ロゴタイプ", "シンボルマーク", "アバター"],
+                    correctAnswerIndex: 0,
+                    explanation: "ピクトグラムは、文字が読めない人や外国語話者にも情報を伝えるための視覚記号です。"
+                },
+                {
+                    question: "年齢や障がいの有無にかかわらず、誰もが使いやすいように設計することを何というか。",
+                    options: ["ユニバーサルデザイン", "バリアフリー", "ユーザビリティ", "アクセシビリティ"],
+                    correctAnswerIndex: 0,
+                    explanation: "「すべての人のためのデザイン」という意味です。バリアフリーは「障壁を取り除く」という点で少しニュアンスが異なります。"
+                },
+                {
+                    question: "人間の「使いやすさ」を表す指標を何というか。",
+                    options: ["ユーザビリティ", "アクセシビリティ", "フレキシビリティ", "ポータビリティ"],
+                    correctAnswerIndex: 0,
+                    explanation: "有効さ、効率、満足度などがユーザビリティの要素です。"
+                },
+                {
+                    question: "色覚の多様性に配慮し、多くの人に見分けやすい配色を行うことを何というか。",
+                    options: ["カラーユニバーサルデザイン", "カラーコーディネート", "グラフィックデザイン", "Webデザイン"],
+                    correctAnswerIndex: 0,
+                    explanation: "色弱者にも区別しやすい色使いや、色以外の情報（文字や模様）を併用することが重要です。"
+                }
+            ],
+            "10 アナログとデジタル": [
+                {
+                    question: "情報を連続した量（波など）で表現する方式を何というか。",
+                    options: ["アナログ", "デジタル", "バイナリ", "クオンタム"],
+                    correctAnswerIndex: 0,
+                    explanation: "時計の針や水銀温度計のように、連続的に変化する量をそのまま表すのがアナログです。"
+                },
+                {
+                    question: "情報の最小単位「ビット(bit)」は、何種類の状態を表現できるか。",
+                    options: ["2通り", "8通り", "10通り", "16通り"],
+                    correctAnswerIndex: 0,
+                    explanation: "ビットは0と1の2通りの状態を表します。Binary Digitの略です。"
+                },
+                {
+                    question: "8ビットをまとめた単位を何というか。",
+                    options: ["バイト(Byte)", "ワード(Word)", "キロ(Kilo)", "パケット(Packet)"],
+                    correctAnswerIndex: 0,
+                    explanation: "1 Byte = 8 bit で、256通りの情報を表現できます。"
+                },
+                {
+                    question: "2進数の「101」を10進数に変換するといくつになるか。",
+                    options: ["5", "3", "6", "7"],
+                    correctAnswerIndex: 0,
+                    explanation: "1×4 + 0×2 + 1×1 = 5 となります。"
+                },
+                {
+                    question: "アナログ信号をデジタル信号に変換する際に、波の形を一定間隔で読み取ることを何というか。",
+                    options: ["標本化（サンプリング）", "量子化", "符号化", "圧縮"],
+                    correctAnswerIndex: 0,
+                    explanation: "AD変換の第一段階で、時間を区切って値を取り出すことです。その後、量子化、符号化と続きます。"
+                }
+            ]
+        };
+
+        // 2. APP LOGIC
+        const STORAGE_KEY = 'info_tech_quiz_v5';
+        const CHAPTERS = Object.keys(QUESTION_BANK);
+
+        let state = {
+            view: 'home',
+            selectedChapter: null,
+            questions: [],
+            currentQuestionIndex: 0,
+            score: 0,
+            selectedOption: null,
+            isAnswered: false,
+            stats: {}
+        };
+
+        // --- Logic Functions ---
+        function loadStats() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) state.stats = JSON.parse(saved);
+            } catch (e) {
+                console.error("Failed to load stats", e);
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        }
+
+        function saveStats() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state.stats));
+            } catch (e) { console.error(e); }
+        }
+
+        function updateStats() {
+            const { selectedChapter, score, questions } = state;
+            if (!selectedChapter) return;
+            const prev = state.stats[selectedChapter] || { highScore: 0, totalQuestions: questions.length, playedCount: 0 };
+            state.stats[selectedChapter] = {
+                highScore: Math.max(prev.highScore, score),
+                totalQuestions: questions.length,
+                playedCount: (prev.playedCount || 0) + 1,
+                lastPlayedAt: Date.now()
+            };
+            saveStats();
+        }
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function startQuiz(chapterTitle) {
+            state.selectedChapter = chapterTitle;
+            let candidateQuestions = [];
+            if (chapterTitle === "All") {
+                Object.values(QUESTION_BANK).forEach(qs => candidateQuestions.push(...qs));
+            } else {
+                candidateQuestions = QUESTION_BANK[chapterTitle] || [];
+            }
+
+            const count = chapterTitle === "All" ? 10 : 5;
+            const shuffled = shuffleArray(candidateQuestions);
+            const selected = shuffled.slice(0, Math.min(count, shuffled.length));
+
+            state.questions = selected.map(q => {
+                const originalOptions = q.options;
+                const correctText = originalOptions[q.correctAnswerIndex];
+                const shuffledOptions = shuffleArray(originalOptions);
+                const newCorrectIndex = shuffledOptions.indexOf(correctText);
+                return { ...q, options: shuffledOptions, correctAnswerIndex: newCorrectIndex };
+            });
+
+            state.currentQuestionIndex = 0;
+            state.score = 0;
+            state.selectedOption = null;
+            state.isAnswered = false;
+            state.view = 'playing';
+            render();
+        }
+
+        function handleAnswer(optionIndex) {
+            if (state.isAnswered) return;
+            state.selectedOption = optionIndex;
+            state.isAnswered = true;
+            if (optionIndex === state.questions[state.currentQuestionIndex].correctAnswerIndex) state.score++;
+            render();
+        }
+
+        function handleNext() {
+            if (state.currentQuestionIndex < state.questions.length - 1) {
+                state.currentQuestionIndex++;
+                state.selectedOption = null;
+                state.isAnswered = false;
+                render();
+            } else {
+                updateStats();
+                state.view = 'result';
+                render();
+            }
+        }
+
+        function goHome() {
+            state.view = 'home';
+            state.selectedChapter = null;
+            render();
+        }
+
+        function resetStats() {
+            if (confirm("学習記録をすべて消去しますか？")) {
+                localStorage.removeItem(STORAGE_KEY);
+                state.stats = {};
+                render();
+            }
+        }
+
+        // --- Rendering Functions ---
+        function render() {
+            const app = document.getElementById('app');
+            if (!app) return;
+
+            app.innerHTML = ''; // Clear loading message
+            
+            if (state.view === 'home') renderHome(app);
+            else if (state.view === 'playing') renderPlaying(app);
+            else if (state.view === 'result') renderResult(app);
+
+            if (window.lucide) window.lucide.createIcons();
+        }
+
+        function renderHome(container) {
+            // Header
+            const header = document.createElement('div');
+            header.className = "mb-10 flex items-center space-x-3 animate-fade-in";
+            header.innerHTML = `
+                <div class="p-3 bg-indigo-600/20 rounded-xl backdrop-blur-sm border border-indigo-500/30 shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="brain-circuit" class="w-8 h-8 text-indigo-300"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-indigo-200">Info Tech Master</h1>
+                    <p class="text-xs text-indigo-300/80 tracking-wider uppercase font-semibold">高校情報I 学習クイズ</p>
+                </div>
+            `;
+            container.appendChild(header);
+
+            // Grid
+            const grid = document.createElement('div');
+            grid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-5xl animate-slide-up";
+            
+            CHAPTERS.forEach(chapter => {
+                const btn = createChapterButton(chapter);
+                btn.onclick = () => startQuiz(chapter);
+                grid.appendChild(btn);
+            });
+
+            const allBtn = createChapterButton("All", true);
+            allBtn.onclick = () => startQuiz("All");
+            grid.appendChild(allBtn);
+            container.appendChild(grid);
+
+            // Footer
+            const footer = document.createElement('div');
+            footer.className = "mt-12 flex justify-center animate-fade-in";
+            const resetBtn = document.createElement('button');
+            resetBtn.className = "flex items-center gap-2 text-xs text-slate-500 hover:text-red-400 transition-colors px-4 py-2 rounded-lg hover:bg-red-500/10";
+            resetBtn.innerHTML = `<i data-lucide="trash-2" class="w-3 h-3"></i> 記録をリセット`;
+            resetBtn.onclick = resetStats;
+            footer.appendChild(resetBtn);
+            container.appendChild(footer);
+        }
+
+        function createChapterButton(title, isAll = false) {
+            const stats = state.stats[title];
+            const isPlayed = !!stats;
+            const isPerfect = isPlayed && stats.highScore === stats.totalQuestions && stats.totalQuestions > 0;
+            const percentage = isPlayed && stats.totalQuestions > 0 ? Math.round((stats.highScore / stats.totalQuestions) * 100) : 0;
+
+            const btn = document.createElement('div');
+            let className = "cursor-pointer group relative p-5 rounded-2xl text-left transition-all duration-300 hover:-translate-y-1 select-none ";
+            className += isAll 
+                ? "md:col-span-2 lg:col-span-3 bg-gradient-to-r from-indigo-600/80 to-purple-600/80 hover:from-indigo-600 hover:to-purple-600 border border-white/10 hover:shadow-purple-500/20 hover:shadow-xl"
+                : "bg-white/5 hover:bg-white/10 border border-white/10 hover:border-indigo-500/50 hover:shadow-indigo-500/10 hover:shadow-xl";
+            if (isPerfect) className += " ring-2 ring-yellow-500/50 shadow-yellow-500/20";
+            btn.className = className;
+
+            const iconName = isAll ? 'layers' : 'book-open';
+            const displayTitle = isAll ? "総合確認テスト (全範囲)" : title.split(' ')[1];
+            const subTitle = isAll ? "全チャプターからランダムに出題" : `Chapter ${title.split(' ')[0]}`;
+
+            let content = `
+                <div class="flex items-start gap-4 mb-2 pointer-events-none">
+                    <div class="p-2 rounded-lg transition-colors ${isAll ? 'bg-white/20 text-white' : 'bg-indigo-500/20 text-indigo-300 group-hover:text-white group-hover:bg-indigo-500'}">
+                        <i data-lucide="${iconName}" class="w-5 h-5"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold ${isAll ? 'text-white text-lg' : 'text-slate-100 group-hover:text-white text-sm'} leading-tight">${displayTitle}</h3>
+                        <span class="text-xs ${isAll ? 'text-indigo-100' : 'text-slate-400 group-hover:text-indigo-200'} mt-1 block">${subTitle}</span>
+                    </div>
+                    ${isPerfect ? `<div class="absolute top-3 right-3"><i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-yellow-400 animate-pulse"></i></div>` : ''}
+                </div>
+            `;
+
+            if (isPlayed) {
+                content += `
+                    <div class="mt-2 pt-3 border-t ${isAll ? 'border-white/20' : 'border-white/5'} flex items-center justify-between pointer-events-none">
+                        <div class="flex items-center gap-2">
+                            ${percentage >= 80 
+                                ? `<span class="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full"><i data-lucide="check-circle-2" class="w-3 h-3"></i> Cleared</span>` 
+                                : `<span class="text-[10px] text-slate-400 font-medium">Learning...</span>`
+                            }
+                        </div>
+                        <div class="text-xs font-mono font-medium text-indigo-200">
+                            Score: <span class="${isPerfect ? 'text-yellow-400 font-bold' : 'text-white'}">${percentage}%</span>
+                        </div>
+                    </div>
+                `;
+            }
+            btn.innerHTML = content;
+            return btn;
+        }
+
+        function renderPlaying(container) {
+            const question = state.questions[state.currentQuestionIndex];
+            const progress = ((state.currentQuestionIndex) / state.questions.length) * 100;
+            const displayTitle = state.selectedChapter === "All" ? "総合テスト" : state.selectedChapter.split(' ')[1];
+
+            const wrapper = document.createElement('div');
+            wrapper.className = "w-full max-w-2xl animate-fade-in";
+            wrapper.innerHTML = `
+                <div class="mb-6 flex justify-between items-center text-sm font-medium text-indigo-200">
+                    <span>Question ${state.currentQuestionIndex + 1} / ${state.questions.length}</span>
+                    <span class="bg-indigo-900/50 px-3 py-1 rounded-full border border-indigo-500/30 text-xs truncate max-w-[200px]">${displayTitle}</span>
+                </div>
+                <div class="w-full bg-slate-200/20 rounded-full h-2.5 mb-6 overflow-hidden">
+                    <div class="bg-indigo-500 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: ${progress}%"></div>
+                </div>
+            `;
+
+            const card = document.createElement('div');
+            card.className = "glass-card rounded-3xl shadow-2xl p-6 md:p-8 text-slate-800";
+            
+            const titleEl = document.createElement('h2');
+            titleEl.className = "text-xl md:text-2xl font-bold text-slate-800 mb-6 leading-relaxed";
+            titleEl.textContent = question.question;
+            card.appendChild(titleEl);
+
+            const optsDiv = document.createElement('div');
+            optsDiv.className = "space-y-3";
+            question.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                let btnClass = "w-full p-4 text-left rounded-xl border-2 transition-all duration-200 relative overflow-hidden font-medium flex items-center justify-between ";
+                
+                if (!state.isAnswered) {
+                    btnClass += "border-slate-100 hover:border-indigo-300 hover:bg-indigo-50 bg-white text-slate-700 cursor-pointer";
+                    btn.onclick = () => handleAnswer(idx);
+                } else {
+                    btn.disabled = true;
+                    if (idx === question.correctAnswerIndex) btnClass += "border-green-500 bg-green-50 text-green-800";
+                    else if (state.selectedOption === idx) btnClass += "border-red-500 bg-red-50 text-red-800";
+                    else btnClass += "border-slate-100 bg-slate-50 text-slate-400 opacity-50";
+                }
+                btn.className = btnClass;
+                
+                let icon = "";
+                if (state.isAnswered) {
+                    if (idx === question.correctAnswerIndex) icon = `<i data-lucide="check-circle-2" class="w-5 h-5 text-green-600"></i>`;
+                    else if (state.selectedOption === idx) icon = `<i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>`;
+                }
+                btn.innerHTML = `<span>${opt}</span>${icon}`;
+                optsDiv.appendChild(btn);
+            });
+            card.appendChild(optsDiv);
+
+            if (state.isAnswered) {
+                const footer = document.createElement('div');
+                footer.className = "mt-6 animate-slide-up";
+                const isLast = state.currentQuestionIndex === state.questions.length - 1;
+                footer.innerHTML = `
+                    <div class="bg-indigo-50 rounded-xl p-4 mb-6 border border-indigo-100">
+                        <h4 class="font-semibold text-indigo-900 mb-1 flex items-center gap-2"><i data-lucide="lightbulb" class="w-4 h-4"></i> 解説</h4>
+                        <p class="text-indigo-800 text-sm leading-relaxed">${question.explanation}</p>
+                    </div>
+                    <div class="flex justify-end">
+                        <button id="next-btn" class="cursor-pointer group bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold transition-all flex items-center shadow-lg shadow-indigo-500/30">
+                            ${isLast ? '結果を見る' : '次へ進む'} <i data-lucide="arrow-right" class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </div>
+                `;
+                card.appendChild(footer);
+                // Event Delegation safe approach
+                setTimeout(() => {
+                    const nextBtn = document.getElementById('next-btn');
+                    if(nextBtn) nextBtn.onclick = handleNext;
+                }, 0);
+            }
+            wrapper.appendChild(card);
+            container.appendChild(wrapper);
+        }
+
+        function renderResult(container) {
+            const isPerfect = state.score === state.questions.length;
+            const wrapper = document.createElement('div');
+            wrapper.className = "glass p-10 rounded-3xl shadow-2xl text-center max-w-md w-full animate-slide-up mt-8 mx-auto";
+            wrapper.innerHTML = `
+                <div class="w-24 h-24 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6 ring-4 ring-yellow-500/10">
+                    <i data-lucide="trophy" class="w-12 h-12 text-yellow-400"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-white mb-2">Completed!</h2>
+                <p class="text-indigo-200 mb-8">${isPerfect ? "全問正解！完璧です！" : "学習お疲れ様でした！"}</p>
+                <div class="bg-slate-900/50 rounded-2xl p-6 mb-8 border border-slate-800">
+                    <div class="text-5xl font-bold text-white mb-2 tracking-tight">${state.score} <span class="text-2xl text-slate-400 font-normal">/ ${state.questions.length}</span></div>
+                    <p class="text-sm text-slate-400 font-medium uppercase tracking-widest">Score</p>
+                </div>
+                <button id="home-btn" class="cursor-pointer w-full bg-white/10 hover:bg-white/20 text-white py-3 px-6 rounded-xl font-semibold transition-colors border border-white/10">チャプター選択へ戻る</button>
+            `;
+            container.appendChild(wrapper);
+            document.getElementById('home-btn').onclick = goHome;
+        }
+
+        // 3. BOOTSTRAP
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            render();
+        });
+    </script>
+</body>
 </html>
