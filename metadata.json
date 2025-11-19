@@ -1,0 +1,5 @@
+{
+  "name": "Gemini Quiz Master",
+  "description": "An aesthetic, AI-powered quiz application that generates custom multiple-choice questions on any topic using Gemini 2.5 Flash.",
+  "requestFramePermissions": []
+}
