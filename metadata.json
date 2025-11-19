@@ -1,5 +1,5 @@
 {
-  "name": "Gemini Quiz Master",
-  "description": "An aesthetic, AI-powered quiz application that generates custom multiple-choice questions on any topic using Gemini 2.5 Flash.",
+  "name": "Info Tech Quiz Master",
+  "description": "An aesthetic quiz application based on high school information technology curriculum.",
   "requestFramePermissions": []
 }

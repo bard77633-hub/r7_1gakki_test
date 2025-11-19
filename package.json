@@ -1,5 +1,5 @@
 {
-  "name": "gemini-quiz-master",
+  "name": "info-tech-quiz-master",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,8 +11,7 @@
   "dependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "lucide-react": "^0.554.0",
-    "@google/genai": "^1.30.0"
+    "lucide-react": "^0.554.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
